@@ -1,6 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType, text_node_to_html_node
+from inline_markdown_parser import split_nodes_delimiter
 
 
 class TestTextNode(unittest.TestCase):
@@ -86,6 +87,27 @@ class TestTextNode(unittest.TestCase):
             text_node_to_html_node(node)
         self.assertIn("Invalid TextType", str(context.exception))
 
+
+    def test_split_nodes_delimiter_basic_bold(self):
+        node = TextNode("Hello **world**!", TextType.TEXT)
+        result = split_nodes_delimiter([node], "**", TextType.BOLD)
+        expected = [
+            TextNode("Hello ", TextType.TEXT),
+            TextNode("world", TextType.BOLD),
+            TextNode("!", TextType.TEXT),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_split_nodes_delimiter_ignores_non_text(self):
+        node = TextNode("Already bold", TextType.BOLD)
+        result = split_nodes_delimiter([node], "**", TextType.BOLD)
+        self.assertEqual(result, [node])
+
+    def test_split_nodes_delimiter_raises_on_unmatched(self):
+        node = TextNode("This is **broken", TextType.TEXT)
+        with self.assertRaises(Exception) as context:
+            split_nodes_delimiter([node], "**", TextType.BOLD)
+        self.assertIn("Invalid Markdown syntax", str(context.exception))
 
 if __name__ == "__main__":
     unittest.main()
