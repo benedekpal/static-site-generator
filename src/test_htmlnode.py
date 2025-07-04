@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -40,6 +40,27 @@ class TestHTMLNode(unittest.TestCase):
         self.assertIn("HTMLNode", repr_output)
         self.assertNotIn("Exception", repr_output)
 
+    def test_leaf_to_html_p(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+
+    def test_leaf_to_html_no_tag(self):
+        node = LeafNode(None, "Just text")
+        self.assertEqual(node.to_html(), "Just text")
+
+    def test_leaf_to_html_with_props(self):
+        node = LeafNode("a", "Click me", props={"href": "https://example.com", "target": "_blank"})
+        result = node.to_html()
+        self.assertIn('<a', result)
+        self.assertIn('href="https://example.com"', result)
+        self.assertIn('target="_blank"', result)
+        self.assertIn('Click me', result)
+        self.assertTrue(result.endswith('</a>'))
+    
+    def test_leaf_to_html_missing_value(self):
+        node = LeafNode("p", None)
+        with self.assertRaises(ValueError):
+            node.to_html()
 
 if __name__ == "__main__":
     unittest.main()
