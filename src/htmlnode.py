@@ -11,10 +11,12 @@ class HTMLNode():
         raise NotImplementedError("to_html method not implemented")
     
     def props_to_html(self):
-        buffer = ""
+        if self.props is None:
+            return ""
+        props_html = ""
         for key, val in self.props.items():
-            buffer += f" {key}=\"{val}\""
-        return buffer
+            props_html += f' {key}="{val}"'
+        return props_html
     
     def __repr__(self):
         try:
@@ -51,3 +53,4 @@ class ParentNode(HTMLNode):
         for child in self.children:
             children_html += child.to_html()
         return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
+    
