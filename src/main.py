@@ -67,7 +67,7 @@ def main():
     else:
         basepath = "/"
 
-    copy_folder_content("./static", "./public")
+    copy_folder_content("./static", "./docs")
 
     #generate_page("./content/index.md", "./template.html", "./public/index.html")
     generate_pages_recursive("./content", "./template.html", "./docs", basepath)
