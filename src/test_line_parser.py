@@ -143,6 +143,14 @@ class TestTextNode(unittest.TestCase):
         ]
         result = text_to_textnodes(text)
         self.assertListEqual(result, expected)
+
+    def test_tolkien(self):
+        text = "![JRR Tolkien sitting](/images/tolkien.png)"
+        expected = [
+            TextNode("JRR Tolkien sitting", TextType.IMAGE, "/images/tolkien.png")
+        ]
+        result = text_to_textnodes(text)
+        self.assertListEqual(result, expected)
         
 
 if __name__ == "__main__":

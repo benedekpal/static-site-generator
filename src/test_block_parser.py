@@ -1,6 +1,6 @@
 import unittest
 
-from block_markdown_parser import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
+from block_markdown_parser import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node, extract_title
 
 class TestBlockParser(unittest.TestCase):
 
@@ -161,6 +161,23 @@ This is the second paragraph after multiple breaks
             "<div><ol><li>First item</li><li>Second with <b>bold</b></li><li>Third with <i>italic</i></li></ol></div>",
         )
 
+    def test_get_heading_from_markdown(self):
+        md = """
+    # This is the title
+
+    ## This is a heading with **bold**
+
+    """
+        title = extract_title(md)
+        self.assertEqual(title, "This is the title")
+
+    def test_get_no_heading_from_markdown(self):
+        md = """
+    ## This is a heading with **bold**
+    
+    """
+        with self.assertRaises(Exception):
+            title = extract_title(md)
     
 
 if __name__ == "__main__":

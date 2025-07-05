@@ -80,6 +80,9 @@ def markdown_to_html_node(markdown):
     #print(f"parent_node.children: {parent_node.children}")
     for markdownBlock in markdownBlocks:
         markdownBlockType = block_to_block_type(markdownBlock)
+        
+        #print(f"TYPE: {markdownBlockType} \nCONTENT:\n{markdownBlock}")
+        #print(".........................................................")
         match markdownBlockType:
             case BlockType.CODE:
                 code = clean_block_text(markdownBlock, BlockType.CODE)
@@ -112,8 +115,18 @@ def markdown_to_html_node(markdown):
                 parent_node.children.append(headNode)
             case BlockType.PARAGRAPH:
                 paragraph_text = re.sub(r'\s+', ' ', markdownBlock.strip())
+                #paragraph_text = markdownBlock
                 paragraphNodes = text_to_textnodes(paragraph_text)
                 pNode = ParentNode("p", list(map(text_node_to_html_node, paragraphNodes)))
                 parent_node.children.append(pNode)
 
     return parent_node
+
+def extract_title(markdown):
+    markdownBlocks = markdown_to_blocks(markdown)
+    for block in markdownBlocks:
+        if block_to_block_type(block) == BlockType.HEADING:
+            levelOfHeading, headingText = clean_block_text(block, BlockType.HEADING)
+            if levelOfHeading == 1:
+                return headingText
+    raise Exception("Missing heading from Markdown!!!")

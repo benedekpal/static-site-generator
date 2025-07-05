@@ -2,6 +2,7 @@ from textnode import TextNode
 from textnode import TextType, TextNode
 import os
 import shutil
+from block_markdown_parser import markdown_to_html_node, extract_title
 
 def copy_folder_content(source, target):
     if os.path.exists(target):
@@ -18,12 +19,36 @@ def copy_folder_content(source, target):
             else:
                 copy_folder_content(source_path, target_path)
 
+def generate_page(from_path, template_path, dest_path):
+    print(f"\nGenerating page from {from_path} to {dest_path} using {template_path}\n")
+
+    fpContent = ""
+    tpContent = ""
+
+    with open(from_path, "r") as fp:
+        fpContent = fp.read()
+
+    with open(template_path, "r") as tp:
+        tpContent = tp.read()
+
+    fpMarkdown = markdown_to_html_node(fpContent).to_html()
+    title = extract_title(fpContent)
+
+    tpContent = tpContent.replace("{{ Title }}", title)
+    tpContent = tpContent.replace("{{ Content }}", fpMarkdown)
+    
+    targetDir = os.path.dirname(dest_path)
+    if not os.path.isdir(targetDir):
+        os.makedirs(targetDir)
+    
+    with open(dest_path, "w") as dp:
+        dp.write(tpContent)
+
 
 def main():
     copy_folder_content("./static", "./public")
 
-    new_node = TextNode("This is some anchor text", TextType.LINK, "https://www.boot.dev")
-    print(str(new_node))
+    generate_page("./content/index.md", "./template.html", "./public/index.html")
 
 if __name__ == "__main__":
     main()
