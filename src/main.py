@@ -3,6 +3,7 @@ from textnode import TextType, TextNode
 import os
 import shutil
 from block_markdown_parser import markdown_to_html_node, extract_title
+import sys
 
 def copy_folder_content(source, target):
     if os.path.exists(target):
@@ -19,7 +20,7 @@ def copy_folder_content(source, target):
             else:
                 copy_folder_content(source_path, target_path)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"\nGenerating page from {from_path} to {dest_path} using {template_path}\n")
 
     fpContent = ""
@@ -36,6 +37,8 @@ def generate_page(from_path, template_path, dest_path):
 
     tpContent = tpContent.replace("{{ Title }}", title)
     tpContent = tpContent.replace("{{ Content }}", fpMarkdown)
+    tpContent = tpContent.replace("href=\"/", f"href=\"{basepath}")
+    tpContent = tpContent.replace("src=\"/", f"src=\"{basepath}")
     
     targetDir = os.path.dirname(dest_path)
     if not os.path.isdir(targetDir):
@@ -44,7 +47,7 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, "w") as dp:
         dp.write(tpContent)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     if not os.path.exists(dest_dir_path):
         os.makedirs(dest_dir_path)
 
@@ -53,16 +56,21 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         dest_path = os.path.join(dest_dir_path, content.replace(".md", ".html"))
 
         if os.path.isfile(content_path) and content.endswith(".md"):
-            generate_page(content_path, template_path, dest_path)
+            generate_page(content_path, template_path, dest_path, basepath)
         elif os.path.isdir(content_path):
-            generate_pages_recursive(content_path, template_path, os.path.join(dest_dir_path, content))
+            generate_pages_recursive(content_path, template_path, os.path.join(dest_dir_path, content), basepath)
 
 
 def main():
+    if len(sys.argv) >1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+
     copy_folder_content("./static", "./public")
 
     #generate_page("./content/index.md", "./template.html", "./public/index.html")
-    generate_pages_recursive("./content", "./template.html", "./public")
+    generate_pages_recursive("./content", "./template.html", "./docs", basepath)
 
 if __name__ == "__main__":
     main()
