@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType, text_node_to_html_node
-from inline_markdown_parser import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link
+from inline_markdown_parser import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
 
 
 class TestTextNode(unittest.TestCase):
@@ -187,6 +187,45 @@ class TestTextNode(unittest.TestCase):
             ],
             new_nodes,
         )
+
+    def test_complex_text(self):
+        text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+        result = text_to_textnodes(text)
+        self.assertListEqual(result, expected)
+
+    def test_only_bold_and_italic(self):
+        text = "**Bold** text and *italic* text."
+        expected = [
+            TextNode("Bold", TextType.BOLD),
+            TextNode(" text and ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" text.", TextType.TEXT),
+        ]
+        result = text_to_textnodes(text)
+        self.assertListEqual(result, expected)
+
+    def test_images_and_links(self):
+        text = "Image: ![alt text](http://example.com/image.png) and link: [Example](http://example.com)"
+        expected = [
+            TextNode("Image: ", TextType.TEXT),
+            TextNode("alt text", TextType.IMAGE, "http://example.com/image.png"),
+            TextNode(" and link: ", TextType.TEXT),
+            TextNode("Example", TextType.LINK, "http://example.com"),
+        ]
+        result = text_to_textnodes(text)
+        self.assertListEqual(result, expected)
 
 
 if __name__ == "__main__":

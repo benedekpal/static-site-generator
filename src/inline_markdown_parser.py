@@ -92,3 +92,15 @@ def split_nodes_link(old_nodes):
             buffer.append(node)
 
     return buffer
+
+def text_to_textnodes(text):
+    startingNode = TextNode(text, TextType.TEXT)
+    processedNodes = [startingNode]
+    processedNodes = split_nodes_image(processedNodes)
+    processedNodes = split_nodes_link(processedNodes)
+    processedNodes = split_nodes_delimiter(processedNodes, "**", TextType.BOLD)
+    processedNodes = split_nodes_delimiter(processedNodes, "_", TextType.ITALIC)
+    processedNodes = split_nodes_delimiter(processedNodes, "*", TextType.ITALIC)
+    processedNodes = split_nodes_delimiter(processedNodes, "`", TextType.CODE)
+    return processedNodes
+
