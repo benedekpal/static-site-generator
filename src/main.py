@@ -44,11 +44,25 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, "w") as dp:
         dp.write(tpContent)
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if not os.path.exists(dest_dir_path):
+        os.makedirs(dest_dir_path)
+
+    for content in os.listdir(dir_path_content):
+        content_path = os.path.join(dir_path_content, content)
+        dest_path = os.path.join(dest_dir_path, content.replace(".md", ".html"))
+
+        if os.path.isfile(content_path) and content.endswith(".md"):
+            generate_page(content_path, template_path, dest_path)
+        elif os.path.isdir(content_path):
+            generate_pages_recursive(content_path, template_path, os.path.join(dest_dir_path, content))
+
 
 def main():
     copy_folder_content("./static", "./public")
 
-    generate_page("./content/index.md", "./template.html", "./public/index.html")
+    #generate_page("./content/index.md", "./template.html", "./public/index.html")
+    generate_pages_recursive("./content", "./template.html", "./public")
 
 if __name__ == "__main__":
     main()
