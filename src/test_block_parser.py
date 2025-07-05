@@ -1,8 +1,8 @@
 import unittest
 
-from block_markdown_parser import markdown_to_blocks
+from block_markdown_parser import markdown_to_blocks, block_to_block_type, BlockType
 
-class TestTextNode(unittest.TestCase):
+class TestBlockParser(unittest.TestCase):
 
     def test_markdown_to_blocks(self):
         md = """
@@ -55,6 +55,30 @@ This is the second paragraph after multiple breaks
             blocks,
             ["This is a single paragraph with **bold**, _italic_, and `code`."],
         )
+
+    def test_heading_block(self):
+        text = "# This is a heading"
+        self.assertEqual(block_to_block_type(text), BlockType.HEADING)
+
+    def test_code_block(self):
+        text = "```\ndef hello():\n    return 'world'\n```"
+        self.assertEqual(block_to_block_type(text), BlockType.CODE)
+
+    def test_quote_block(self):
+        text = "> This is a quote\n> Spanning multiple lines"
+        self.assertEqual(block_to_block_type(text), BlockType.QUOTE)
+
+    def test_unordered_list_block(self):
+        text = "- Item one\n- Item two\n- Item three"
+        self.assertEqual(block_to_block_type(text), BlockType.UNORDERED_LIST)
+
+    def test_ordered_list_block(self):
+        text = "1. First item\n2. Second item\n3. Third item"
+        self.assertEqual(block_to_block_type(text), BlockType.ORDERED_LIST)
+
+    def test_paragraph_block(self):
+        text = "This is a paragraph that doesn't match any other block type."
+        self.assertEqual(block_to_block_type(text), BlockType.PARAGRAPH)
 
 if __name__ == "__main__":
     unittest.main()
