@@ -1,6 +1,6 @@
 import unittest
 
-from block_markdown_parser import markdown_to_blocks, block_to_block_type, BlockType
+from block_markdown_parser import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
 
 class TestBlockParser(unittest.TestCase):
 
@@ -79,6 +79,89 @@ This is the second paragraph after multiple breaks
     def test_paragraph_block(self):
         text = "This is a paragraph that doesn't match any other block type."
         self.assertEqual(block_to_block_type(text), BlockType.PARAGRAPH)
+
+    def test_paragraphs(self):
+        md = """
+    This is **bolded** paragraph
+    text in a p
+    tag here
+
+    This is another paragraph with _italic_ text and `code` here
+
+    """
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = """
+    ```
+    This is text that _should_ remain
+    the **same** even with inline stuff
+    ```
+    """
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
+
+    def test_heading_block(self):
+        md = """
+    ### This is a heading with **bold**
+    """
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h3>This is a heading with <b>bold</b></h3></div>",
+        )
+
+    def test_quote_block(self):
+        md = """
+    > This is a quote with _emphasis_
+    > And a second line
+    """
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><blockquote>This is a quote with <i>emphasis</i> And a second line</blockquote></div>",
+        )
+
+    def test_unordered_list_block(self):
+        md = """
+    - Item one with `code`
+    - Item **two**
+    - _Item three_
+    """
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ul><li>Item one with <code>code</code></li><li>Item <b>two</b></li><li><i>Item three</i></li></ul></div>",
+        )
+
+    def test_ordered_list_block(self):
+        md = """
+    1. First item
+    2. Second with **bold**
+    3. Third with _italic_
+    """
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ol><li>First item</li><li>Second with <b>bold</b></li><li>Third with <i>italic</i></li></ol></div>",
+        )
+
+    
 
 if __name__ == "__main__":
     unittest.main()
